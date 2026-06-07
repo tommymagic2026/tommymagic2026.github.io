@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星际战机 - 音频管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 42px;
+            background: linear-gradient(90deg, #00d4ff, #ff00cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #888;
+        }
+
+        .audio-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #00d4ff;
+            border-left: 4px solid #00d4ff;
+            padding-left: 15px;
+        }
+
+        .audio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .audio-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .audio-card:hover {
+            border-color: #00d4ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .audio-info {
+            margin-bottom: 15px;
+        }
+
+        .audio-name {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .audio-desc {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .audio-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        .status-loaded {
+            background: rgba(0, 255, 0, 0.2);
+            color: #0f0;
+        }
+
+        .status-loading {
+            background: rgba(255, 165, 0, 0.2);
+            color: #ffa500;
+        }
+
+        .status-error {
+            background: rgba(255, 0, 0, 0.2);
+            color: #f00;
+        }
+
+        .audio-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        audio {
+            width: 100%;
+            border-radius: 20px;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .volume-control label {
+            font-size: 12px;
+            color: #aaa;
+            min-width: 50px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: #00d4ff;
+        }
+
+        .global-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 65, 108, 0.4);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .code-section {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            overflow-x: auto;
+        }
+
+        .code-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #00d4ff;
+        }
+
+        pre {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        .highlight {
+            color: #00d4ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>星际战机 · 音频管理系统</h1>
+            <p class="subtitle">统一管理所有游戏背景音乐和音效</p>
+        </header>
+
+        <!-- 菜单背景音乐 -->
+        <div class="audio-section">
+            <h2 class="section-title">菜单音乐</h2>
+            <div class="audio-grid">
+                <div class="audio-card" data-key="start">
+                    <div class="audio-info">
+                        <div class="audio-name">bgm_start.mp3</div>
+                        <div class="audio-desc">主菜单背景音乐</div>
+                        <span class="audio-status" id="status-start">加载中...</span>
+                    </div>
+                    <audio id="audio-start" controls preload="auto">
+                        <source src="bgm_start.mp3" type="audio/mpeg">
+                        您的浏览器不支持音频播放
+                    </audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关卡背景音乐 -->
+        <div class="audio-section">
+            <h2 class="section-title">关卡背景音乐</h2>
+            <div class="audio-grid">
+                <div class="audio-card" data-key="1">
+                    <div class="audio-info">
+                        <div class="audio-name">bgm_level1.mp3</div>
+                        <div class="audio-desc">第一关 · 深空启航 背景音乐</div>
+                        <span class="audio-status" id="status-1">加载中...</span>
+                    </div>
+                    <audio id="audio-1" controls preload="auto">
+                        <source src="bgm_level1.mp3" type="audio/mpeg">
+                        您的浏览器不支持音频播放
+                    </audio>
+                </div>
+                <div class="audio-card" data-key="2">
+                    <div class="audio-info">
+                        <div class="audio-name">bgm_level2.mp3</div>
+                        <div class="audio-desc">第二关 · 星云漩涡 背景音乐</div>
+                        <span class="audio-status" id="status-2">加载中...</span>
+                    </div>
+                    <audio id="audio-2" controls preload="auto">
+                        <source src="bgm_level2.mp3" type="audio/mpeg">
+                        您的浏览器不支持音频播放
+                    </audio>
+                </div>
+                <div class="audio-card" data-key="3">
+                    <div class="audio-info">
+                        <div class="audio-name">bgm_level3.mp3</div>
+                        <div class="audio-desc">第三关 · 紫幻星域 背景音乐</div>
+                        <span class="audio-status" id="status-3">加载中...</span>
+                    </div>
+                    <audio id="audio-3" controls preload="auto">
+                        <source src="bgm_level3.mp3" type="audio/mpeg">
+                        您的浏览器不支持音频播放
+                    </audio>
+                </div>
+                <div class="audio-card" data-key="4">
+                    <div class="audio-info">
+                        <div class="audio-name">bgm_level4.mp3</div>
+                        <div class="audio-desc">第四关 · 烈焰星带 背景音乐</div>
+                        <span class="audio-status" id="status-4">加载中...</span>
+                    </div>
+                    <audio id="audio-4" controls preload="auto">
+                        <source src="bgm_level4.mp3" type="audio/mpeg">
+                        您的浏览器不支持音频播放
+                    </audio>
+                </div>
+                <div class="audio-card" data-key="5">
+                    <div class="audio-info">
+                        <div class="audio-name">bgm_level5.mp3</div>
+                        <div class="audio-desc">第五关 · 银河核心 背景音乐</div>
+                        <span class="audio-status" id="status-5">加载中...</span>
+                    </div>
+                    <audio id="audio-5" controls preload="auto">
+                        <source src="bgm_level5.mp3" type="audio/mpeg">
+                        您的浏览器不支持音频播放
+                    </audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- Boss和胜利音乐 -->
+        <div class="audio-section">
+            <h2 class="section-title">特殊场景音乐</h2>
+            <div class="audio-grid">
+                <div class="audio-card" data-key="boss">
+                    <div class="audio-info">
+                        <div class="audio-name">bgm_boss.mp3</div>
+                        <div class="audio-desc">Boss战背景音乐</div>
+                        <span class="audio-status" id="status-boss">加载中...</span>
+                    </div>
+                    <audio id="audio-boss" controls preload="auto">
+                        <source src="bgm_boss.mp3" type="audio/mpeg">
+                        您的浏览器不支持音频播放
+                    </audio>
+                </div>
+                <div class="audio-card" data-key="victory">
+                    <div class="audio-info">
+                        <div class="audio-name">bgm_victory.mp3</div>
+                        <div class="audio-desc">关卡胜利背景音乐</div>
+                        <span class="audio-status" id="status-victory">加载中...</span>
+                    </div>
+                    <audio id="audio-victory" controls preload="auto">
+                        <source src="bgm_victory.mp3" type="audio/mpeg">
+                        您的浏览器不支持音频播放
+                    </audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- 音效 -->
+        <div class="audio-section">
+            <h2 class="section-title">游戏音效</h2>
+            <div class="audio-grid">
+                <div class="audio-card" data-key="laser">
+                    <div class="audio-info">
+                        <div class="audio-name">laser.mp3</div>
+                        <div class="audio-desc">玩家射击激光音效</div>
+                        <span class="audio-status" id="status-laser">加载中...</span>
+                    </div>
+                    <audio id="audio-laser" controls preload="auto">
+                        <source src="laser.mp3" type="audio/mpeg">
+                        您的浏览器不支持音频播放
+                    </audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="total-count">8</div>
+                <div class="stat-label">总音频文件</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="loaded-count">0</div>
+                <div class="stat-label">已加载</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="error-count">0</div>
+                <div class="stat-label">加载失败</div>
+            </div>
+        </div>
+
+        <!-- 全局控制 -->
+        <div class="global-controls">
+            <button class="btn-primary" onclick="audioManager.stopAll()">停止所有播放</button>
+            <button class="btn-primary" onclick="audioManager.preloadAll()">重新预加载所有</button>
+            <button class="btn-danger" onclick="audioManager.stopAll()">静音所有</button>
+        </div>
+
+        <!-- 使用说明 -->
+        <div class="code-section">
+            <h3 class="code-title">JavaScript 调用接口</h3>
+<pre>
+<span class="highlight">// 音频管理器全局对象</span>
+<span class="highlight">window.audioManager</span>
+
+<span class="highlight">// 播放背景音乐</span>
+<span class="highlight">audioManager.playBgm('start')</span>   <span class="comment">// 播放菜单音乐</span>
+<span class="highlight">audioManager.playBgm(1)</span>       <span class="comment">// 播放第一关音乐</span>
+<span class="highlight">audioManager.playBgm('boss')</span>    <span class="comment">// 播放Boss音乐</span>
+
+<span class="highlight">// 停止背景音乐</span>
+<span class="highlight">audioManager.stopBgm()</span>
+
+<span class="highlight">// 播放音效</span>
+<span class="highlight">audioManager.playSfx('laser')</span>  <span class="comment">// 播放射击音效</span>
+
+<span class="highlight">// 设置音量 (0.0 - 1.0)</span>
+<span class="highlight">audioManager.setBgmVolume(0.6)</span>
+<span class="highlight">audioManager.setSfxVolume(0.4)</span>
+
+<span class="highlight">// 获取所有音频配置 (供Python游戏调用)</span>
+<span class="highlight">audioManager.getConfig()</span>
+</pre>
+        </div>
+    </div>
+
+<script>
+// 音频配置 - 对应shoot_game.py中的配置
+const audioConfig = {
+    bgm: {
+        start: "bgm_start.mp3",
+        1: "bgm_level1.mp3",
+        2: "bgm_level2.mp3",
+        3: "bgm_level3.mp3",
+        4: "bgm_level4.mp3",
+        5: "bgm_level5.mp3",
+        boss: "bgm_boss.mp3",
+        victory: "bgm_victory.mp3"
+    },
+    sfx: {
+        laser: "laser.mp3"
+    }
+};
+
+// 全局音频管理器
+class AudioManager {
+    constructor() {
+        this.audioElements = {};
+        this.currentBgm = null;
+        this.bgmVolume = 0.6;
+        this.sfxVolume = 0.4;
+        this.stats = {
+            total: 8,
+            loaded: 0,
+            errors: 0
+        };
+        this.init();
+    }
+
+    init() {
+        // 注册所有音频元素
+        this.registerAllAudio();
+        // 监听加载状态
+        this.trackLoading();
+        // 设置初始音量
+        this.updateStats();
+    }
+
+    registerAllAudio() {
+        // BGM
+        Object.keys(audioConfig.bgm).forEach(key => {
+            const elem = document.getElementById(`audio-${key}`);
+            if (elem) {
+                this.audioElements[key] = elem;
+                elem.volume = key === 'start' || key === 'boss' || key === 'victory' ? this.bgmVolume : this.bgmVolume;
+            }
+        });
+        
+        // SFX
+        Object.keys(audioConfig.sfx).forEach(key => {
+            const elem = document.getElementById(`audio-${key}`);
+            if (elem) {
+                this.audioElements[key] = elem;
+                elem.volume = this.sfxVolume;
+            }
+        });
+    }
+
+    trackLoading() {
+        Object.keys(this.audioElements).forEach(key => {
+            const audio = this.audioElements[key];
+            const statusElem = document.getElementById(`status-${key}`);
+            
+            audio.addEventListener('canplaythrough', () => {
+                this.stats.loaded++;
+                statusElem.className = 'audio-status status-loaded';
+                statusElem.textContent = '已加载';
+                this.updateStats();
+            });
+            
+            audio.addEventListener('error', () => {
+                this.stats.errors++;
+                statusElem.className = 'audio-status status-error';
+                statusElem.textContent = '加载失败';
+                this.updateStats();
+            });
+        });
+    }
+
+    updateStats() {
+        document.getElementById('total-count').textContent = this.stats.total;
+        document.getElementById('loaded-count').textContent = this.stats.loaded;
+        document.getElementById('error-count').textContent = this.stats.errors;
+    }
+
+    // 播放背景音乐 - 停止当前BGM，播放新的
+    playBgm(key) {
+        // 停止当前播放的BGM
+        if (this.currentBgm && this.audioElements[this.currentBgm]) {
+            this.audioElements[this.currentBgm].pause();
+            this.audioElements[this.currentBgm].currentTime = 0;
+        }
+        
+        const audio = this.audioElements[key];
+        if (audio) {
+            this.currentBgm = key;
+            audio.loop = true;
+            audio.volume = this.bgmVolume;
+            audio.play().catch(e => console.error(`播放BGM失败 ${key}:`, e));
+            return true;
+        }
+        return false;
+    }
+
+    // 停止背景音乐
+    stopBgm() {
+        if (this.currentBgm && this.audioElements[this.currentBgm]) {
+            this.audioElements[this.currentBgm].pause();
+            this.audioElements[this.currentBgm].currentTime = 0;
+        }
+        this.currentBgm = null;
+    }
+
+    // 播放音效（不循环，可叠加）
+    playSfx(key) {
+        const audio = this.audioElements[key];
+        if (audio) {
+            // 克隆节点以支持同时播放多个相同音效
+            const clone = audio.cloneNode();
+            clone.volume = this.sfxVolume;
+            clone.play().catch(e => console.error(`播放SFX失败 ${key}:`, e));
+            // 播放结束后清理
+            clone.onended = () => clone.remove();
+            return true;
+        }
+        return false;
+    }
+
+    // 停止所有音频
+    stopAll() {
+        Object.keys(this.audioElements).forEach(key => {
+            const audio = this.audioElements[key];
+            audio.pause();
+            audio.currentTime = 0;
+        });
+        this.currentBgm = null;
+    }
+
+    // 静音所有
+    muteAll() {
+        Object.keys(this.audioElements).forEach(key => {
+            this.audioElements[key].muted = !this.audioElements[key].muted;
+        });
+    }
+
+    // 设置BGM音量
+    setBgmVolume(volume) {
+        this.bgmVolume = Math.max(0, Math.min(1, volume));
+        Object.keys(audioConfig.bgm).forEach(key => {
+            if (this.audioElements[key]) {
+                this.audioElements[key].volume = this.bgmVolume;
+            }
+        });
+    }
+
+    // 设置SFX音量
+    setSfxVolume(volume) {
+        this.sfxVolume = Math.max(0, Math.min(1, volume));
+        Object.keys(audioConfig.sfx).forEach(key => {
+            if (this.audioElements[key]) {
+                this.audioElements[key].volume = this.sfxVolume;
+            }
+        });
+    }
+
+    // 重新预加载所有
+    preloadAll() {
+        this.stats.loaded = 0;
+        this.stats.errors = 0;
+        Object.keys(this.audioElements).forEach(key => {
+            const statusElem = document.getElementById(`status-${key}`);
+            statusElem.className = 'audio-status status-loading';
+            statusElem.textContent = '加载中...';
+            this.audioElements[key].load();
+        });
+        this.updateStats();
+    }
+
+    // 获取完整配置（供外部调用）
+    getConfig() {
+        return {
+            ...audioConfig,
+            bgmVolume: this.bgmVolume,
+            sfxVolume: this.sfxVolume,
+            stats: this.stats
+        };
+    }
+
+    // 导出Python格式配置（给shoot_game.py参考）
+    getPythonConfig() {
+        let code = '# 音频文件映射 - 由music.html自动生成\n';
+        code += 'bgm_files = {\n';
+        Object.entries(audioConfig.bgm).forEach(([key, path]) => {
+            if (isNaN(key)) {
+                code += `    "${key}": "${path}",\n`;
+            } else {
+                code += `    ${key}: "${path}",\n`;
+            }
+        });
+        code += '    "victory": "bgm_victory.mp3"\n';
+        code += '}\n\n';
+        code += '# 音效文件\n';
+        code += 'sfx_files = {\n';
+        Object.entries(audioConfig.sfx).forEach(([key, path]) => {
+            code += `    "${key}": "${path}"\n`;
+        });
+        code += '}\n';
+        return code;
+    }
+}
+
+// 初始化全局音频管理器
+window.audioManager = new AudioManager();
+
+// 页面加载完成后自动预加载
+window.addEventListener('load', () => {
+    console.log('🎵 音频管理器已初始化');
+    console.log('📋 配置信息:', audioManager.getConfig());
+    console.log('🐍 Python配置代码:');
+    console.log(audioManager.getPythonConfig());
+});
+</script>
+</body>
+</html>

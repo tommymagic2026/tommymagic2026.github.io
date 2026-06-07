@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>★ 星际战机 - 星空背景模块 ★</title>
+<style>
+* {margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;font-family:"Microsoft YaHei",sans-serif;background:#000;color:#fff;}
+#container{width:100%;height:100%;position:relative;}
+canvas{display:block;width:100%;height:100%;}
+#levelSelector{position:absolute;top:20px;left:50%;transform:translateX(-50%);z-index:10;background:rgba(0,0,0,0.7);padding:15px 25px;border-radius:12px;border:1px solid rgba(80,208,255,0.3);backdrop-filter:blur(8px);}
+#levelSelector h3{font-size:16px;margin-bottom:12px;color:#50d0ff;text-align:center;text-shadow:0 0 8px #50d0ff;}
+.level-buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.level-btn{padding:8px 16px;border:1px solid #50d0ff;background:transparent;color:#50d0ff;border-radius:6px;cursor:pointer;transition:all 0.3s;font-size:14px;}
+.level-btn:hover{background:#50d0ff;color:#000;box-shadow:0 0 12px #50d0ff;}
+.level-btn.active{background:#50d0ff;color:#000;box-shadow:0 0 12px #50d0ff;}
+#info{position:absolute;bottom:20px;left:20px;z-index:10;background:rgba(0,0,0,0.6);padding:12px 16px;border-radius:8px;border-left:3px solid #50d0ff;}
+#info h4{color:#50d0ff;margin-bottom:6px;font-size:14px;}
+#info p{font-size:12px;color:#ccc;line-height:1.5;}
+</style>
+</head>
+<body>
+<div id="container">
+  <canvas id="starCanvas"></canvas>
+  <div id="levelSelector">
+    <h3>选择关卡背景</h3>
+    <div class="level-buttons">
+      <button class="level-btn active" data-level="1">第一关 · 深空启航</button>
+      <button class="level-btn" data-level="2">第二关 · 星云漩涡</button>
+      <button class="level-btn" data-level="3">第三关 · 紫幻星域</button>
+      <button class="level-btn" data-level="4">第四关 · 烈焰星带</button>
+      <button class="level-btn" data-level="5">第五关 · 银河核心</button>
+    </div>
+  </div>
+  <div id="info">
+    <h4 id="levelName">第一关：深空启航</h4>
+    <p id="levelDesc">静谧的深蓝色深空，稀疏的星辰缓缓流动，启航之旅从此开始。</p>
+  </div>
+</div>
+
+<script>
+// 星空背景配置 - 5个关卡不同风格
+const levelConfigs = {
+  1: {
+    name: "第一关：深空启航",
+    description: "静谧的深蓝色深空，稀疏的星辰缓缓流动，启航之旅从此开始。",
+    bgColor: "#000515",
+    starCount: 150,
+    layers: [
+      { speed: 0.2, size: [1, 2], color: [180, 220, 255], opacity: [0.3, 0.8] },
+      { speed: 0.5, size: [1, 3], color: [200, 240, 255], opacity: [0.5, 1.0] }
+    ],
+    nebula: false
+  },
+  2: {
+    name: "第二关：星云漩涡",
+    description: "螺旋星云缓缓旋转，蓝紫色星云交织，神秘而壮美。",
+    bgColor: "#05001a",
+    starCount: 200,
+    layers: [
+      { speed: 0.3, size: [1, 2], color: [150, 180, 255], opacity: [0.2, 0.6] },
+      { speed: 0.6, size: [1, 3], color: [180, 120, 255], opacity: [0.4, 0.8] },
+      { speed: 0.9, size: [1, 2], color: [255, 255, 255], opacity: [0.6, 1.0] }
+    ],
+    nebula: true,
+    nebulaColor: [80, 40, 160, 0.15]
+  },
+  3: {
+    name: "第三关：紫幻星域",
+    description: "梦幻紫蓝色星域，高密度星辰，神秘的异星空间。",
+    bgColor: "#0a001f",
+    starCount: 250,
+    layers: [
+      { speed: 0.4, size: [1, 2], color: [200, 100, 255], opacity: [0.2, 0.5] },
+      { speed: 0.7, size: [1, 3], color: [100, 150, 255], opacity: [0.4, 0.7] },
+      { speed: 1.1, size: [1, 2], color: [255, 200, 255], opacity: [0.5, 1.0] }
+    ],
+    nebula: true,
+    nebulaColor: [120, 40, 160, 0.12]
+  },
+  4: {
+    name: "第四关：烈焰星带",
+    description: "炽热的小行星带，橙红色星云，危机四伏的高温区域。",
+    bgColor: "#1a0500",
+    starCount: 220,
+    layers: [
+      { speed: 0.5, size: [1, 2], color: [255, 150, 80], opacity: [0.2, 0.6] },
+      { speed: 0.8, size: [1, 3], color: [255, 80, 40], opacity: [0.4, 0.8] },
+      { speed: 1.2, size: [1, 2], color: [255, 200, 100], opacity: [0.6, 1.0] }
+    ],
+    nebula: true,
+    nebulaColor: [160, 40, 40, 0.18]
+  },
+  5: {
+    name: "第五关：银河核心",
+    description: "银河系中心区域，繁星密布，多彩星云闪耀，最终决战之地。",
+    bgColor: "#000000",
+    starCount: 350,
+    layers: [
+      { speed: 0.3, size: [1, 3], color: [100, 200, 255], opacity: [0.2, 0.5] },
+      { speed: 0.6, size: [1, 3], color: [255, 150, 200], opacity: [0.3, 0.7] },
+      { speed: 0.9, size: [2, 4], color: [255, 255, 200], opacity: [0.4, 0.9] },
+      { speed: 1.5, size: [1, 3], color: [255, 255, 255], opacity: [0.6, 1.0] }
+    ],
+    nebula: true,
+    nebulaColor: [40, 80, 160, 0.15]
+  }
+};
+
+// 画布设置
+const canvas = document.getElementById('starCanvas');
+const ctx = canvas.getContext('2d');
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+
+// 当前星星数组
+let stars = [];
+let currentLevel = 1;
+let config = levelConfigs[1];
+let time = 0;
+
+// 初始化星星
+function initStars() {
+  stars = [];
+  config = levelConfigs[currentLevel];
+  let totalStars = 0;
+  config.layers.forEach((layer, layerIndex) => {
+    const count = Math.floor(config.starCount / config.layers.length * (layerIndex + 1));
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        z: Math.random(), // 深度
+        layerIndex: layerIndex,
+        layer: layer
+      });
+    }
+    totalStars += count;
+  });
+}
+
+// 绘制星云背景
+function drawNebula() {
+  if (!config.nebula) return;
+  const [r, g, b, alpha] = config.nebulaColor;
+  const gradient = ctx.createRadialGradient(
+    width * (0.3 + Math.sin(time * 0.0002) * 0.2),
+    height * (0.3 + Math.cos(time * 0.00015) * 0.2),
+    0,
+    width / 2,
+    height / 2,
+    Math.max(width, height) / 1.5
+  );
+  gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha})`);
+  gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+
+  // 第二个漩涡星云
+  const gradient2 = ctx.createRadialGradient(
+    width * (0.7 + Math.cos(time * 0.0002) * 0.2),
+    height * (0.7 + Math.sin(time * 0.00015) * 0.2),
+    0,
+    width / 3,
+    height / 3,
+    Math.max(width, height) / 2
+  );
+  gradient2.addColorStop(0, `rgba(${r * 1.2}, ${g * 0.8}, ${b * 1.5}, ${alpha * 0.6})`);
+  gradient2.addColorStop(1, `rgba(${r * 1.2}, ${g * 0.8}, ${b * 1.5}, 0)`);
+  ctx.fillStyle = gradient2;
+  ctx.fillRect(0, 0, width, height);
+}
+
+// 绘制动画
+function animate() {
+  // 清空画布
+  ctx.fillStyle = config.bgColor;
+  ctx.fillRect(0, 0, width, height);
+
+  // 绘制星云
+  drawNebula();
+
+  // 更新和绘制星星
+  stars.forEach(star => {
+    const layer = star.layer;
+    const speed = layer.speed;
+    star.y += speed;
+    if (star.y > height) {
+      star.y = 0;
+      star.x = Math.random() * width;
+    }
+
+    // 计算大小和透明度
+    const sizeRange = layer.size;
+    const opacityRange = layer.opacity;
+    const size = sizeRange[0] + star.z * (sizeRange[1] - sizeRange[0]);
+    const opacity = opacityRange[0] + star.z * (opacityRange[1] - opacityRange[0]);
+    const [r, g, b] = layer.color;
+    // 闪烁效果
+    const twinkle = 0.3 * Math.sin(time * 0.01 + star.x + star.y) + 0.7;
+
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity * twinkle})`;
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, size, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 大星星添加光晕
+    if (size > 1.5 && opacity > 0.7) {
+      const glow = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, size * 4);
+      glow.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${opacity * 0.3})`);
+      glow.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, size * 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+
+  time++;
+  requestAnimationFrame(animate);
+}
+
+// 切换关卡
+function changeLevel(level) {
+  currentLevel = level;
+  document.querySelectorAll('.level-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (parseInt(btn.dataset.level) === level) {
+      btn.classList.add('active');
+    }
+  });
+  document.getElementById('levelName').textContent = levelConfigs[level].name;
+  document.getElementById('levelDesc').textContent = levelConfigs[level].description;
+  initStars();
+}
+
+// 事件监听
+document.querySelectorAll('.level-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    changeLevel(parseInt(btn.dataset.level));
+  });
+});
+
+// 窗口大小变化
+window.addEventListener('resize', () => {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  initStars();
+});
+
+// 初始化并开始
+initStars();
+animate();
+</script>
+</body>
+</html>

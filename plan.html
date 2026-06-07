@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✈ 飞机设计库 - 星际战机飞机管理器 ✈</title>
+<style>
+* {margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;font-family:"Microsoft YaHei",sans-serif;background:linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);color:#fff;overflow-y:auto;}
+.container{max-width:1400px;margin:0 auto;padding:30px 20px;}
+.header{text-align:center;margin-bottom:40px;}
+.header h1{font-size:36px;margin-bottom:10px;background:linear-gradient(90deg, #50d0ff, #00ff88);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 30px rgba(80,208,255,0.5);}
+.header p{font-size:16px;color:#aaa;}
+.section{margin-bottom:50px;}
+.section-title{font-size:24px;margin-bottom:25px;padding-left:15px;border-left:4px solid #50d0ff;color:#50d0ff;text-shadow:0 0 10px rgba(80,208,255,0.5);}
+.planes-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:25px;}
+.plane-card{background:rgba(255,255,255,0.05);border:1px solid rgba(80,208,255,0.3);border-radius:12px;padding:20px;backdrop-filter:blur(10px);transition:all 0.3s;}
+.plane-card:hover{transform:translateY(-5px);box-shadow:0 10px 30px rgba(80,208,255,0.2);border-color:#50d0ff;}
+.plane-name{font-size:18px;font-weight:bold;margin-bottom:8px;color:#fff;}
+.plane-info{font-size:14px;color:#aaa;margin-bottom:15px;line-height:1.6;}
+.canvas-wrapper{background:rgba(0,0,0,0.3);border-radius:8px;overflow:hidden;}
+canvas{display:block;width:100%;height:220px;}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+.stat{background:rgba(80,208,255,0.15);border:1px solid rgba(80,208,255,0.3);border-radius:6px;padding:5px 10px;font-size:12px;color:#50d0ff;}
+.stat.enemy{background:rgba(255,80,80,0.15);border-color:rgba(255,80,80,0.3);color:#ff8080;}
+.stat.boss{background:rgba(255,200,0,0.15);border-color:rgba(255,200,0,0.3);color:#ffcc00;}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>✈ 飞机设计库 ✈</h1>
+    <p>我方战机：F-22猛禽隐身战斗机 | 敌方五款美式战机 | 最终Boss：SpaceX星际飞船</p>
+  </div>
+
+  <!-- 我方飞机 -->
+  <div class="section">
+    <h2 class="section-title">我方战机</h2>
+    <div class="planes-grid">
+      <div class="plane-card">
+        <div class="plane-name">F-22 猛禽（我方主力）</div>
+        <div class="plane-info">菱形主翼 + 外倾双垂尾隐身设计，第五代隐身战斗机，具备超音速巡航能力</div>
+        <div class="canvas-wrapper">
+          <canvas id="playerF22" width="320" height="220"></canvas>
+        </div>
+        <div class="stats">
+          <span class="stat">生命值: 100</span>
+          <span class="stat">速度: 5</span>
+          <span class="stat">武器等级: 1-3</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 敌方战机 -->
+  <div class="section">
+    <h2 class="section-title">敌方战机</h2>
+    <div class="planes-grid">
+      <div class="plane-card">
+        <div class="plane-name">F-16 战隼</div>
+        <div class="plane-info">轻型多用途战斗机，机动灵活，快速俯冲攻击，单发设计</div>
+        <div class="canvas-wrapper">
+          <canvas id="enemyF16" width="320" height="220"></canvas>
+        </div>
+        <div class="stats">
+          <span class="stat enemy">生命值: 25-45</span>
+          <span class="stat enemy">速度: 2.5-3.5</span>
+          <span class="stat enemy">子弹伤害: 8</span>
+        </div>
+      </div>
+
+      <div class="plane-card">
+        <div class="plane-name">F-35 闪电II</div>
+        <div class="plane-info">隐身联合攻击战斗机，双侧进气，可扫射攻击，中型多用途</div>
+        <div class="canvas-wrapper">
+          <canvas id="enemyF35" width="320" height="220"></canvas>
+        </div>
+        <div class="stats">
+          <span class="stat enemy">生命值: 40-65</span>
+          <span class="stat enemy">速度: 2.0-3.0</span>
+          <span class="stat enemy">子弹伤害: 10</span>
+        </div>
+      </div>
+
+      <div class="plane-card">
+        <div class="plane-name">F-117 夜鹰</div>
+        <div class="plane-info">世界首款隐身攻击机，多面体棱角外形，特殊折线设计，夜间突袭</div>
+        <div class="canvas-wrapper">
+          <canvas id="enemyF117" width="320" height="220"></canvas>
+        </div>
+        <div class="stats">
+          <span class="stat enemy">生命值: 55-80</span>
+          <span class="stat enemy">速度: 1.8-2.5</span>
+          <span class="stat enemy">子弹伤害: 12</span>
+        </div>
+      </div>
+
+      <div class="plane-card">
+        <div class="plane-name">C-17 环球霸王</div>
+        <div class="plane-info">大型军用运输机，体型宽大，翼展宽阔，重型单位，血厚防高</div>
+        <div class="canvas-wrapper">
+          <canvas id="enemyC17" width="320" height="220"></canvas>
+        </div>
+        <div class="stats">
+          <span class="stat enemy">生命值: 80-120</span>
+          <span class="stat enemy">速度: 1.2-1.8</span>
+          <span class="stat enemy">子弹伤害: 15</span>
+        </div>
+      </div>
+
+      <div class="plane-card">
+        <div class="plane-name">B-52 同温层堡垒</div>
+        <div class="plane-info">远程战略轰炸机，八发引擎，机翼很长，体型巨大，地毯式轰炸</div>
+        <div class="canvas-wrapper">
+          <canvas id="enemyB52" width="320" height="220"></canvas>
+        </div>
+        <div class="stats">
+          <span class="stat enemy">生命值: 120-160</span>
+          <span class="stat enemy">速度: 1.0-1.5</span>
+          <span class="stat enemy">子弹伤害: 18</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Boss -->
+  <div class="section">
+    <h2 class="section-title">关卡Boss</h2>
+    <div class="planes-grid" style="grid-template-columns: 1fr;">
+      <div class="plane-card">
+        <div class="plane-name">SpaceX 星际飞船（最终Boss）</div>
+        <div class="plane-info">可重复使用星际运输船，不锈钢结构，翼面控制，体型庞大，多炮塔攻击，难度提升</div>
+        <div class="canvas-wrapper">
+          <canvas id="bossSpaceX" width="320" height="350"></canvas>
+        </div>
+        <div class="stats">
+          <span class="stat boss">生命值: 2000</span>
+          <span class="stat boss">阶段战斗: 3</span>
+          <span class="stat boss">多种攻击模式</span>
+          <span class="stat boss">高难度挑战</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// 绘制工具函数
+function drawLine(ctx, x1, y1, x2, y2, color, width = 1) {
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.stroke();
+}
+
+function drawPolygon(ctx, points, fillColor, strokeColor = null, lineWidth = 2) {
+  ctx.beginPath();
+  ctx.moveTo(points[0][0], points[0][1]);
+  for(let i = 1; i < points.length; i++) {
+    ctx.lineTo(points[i][0], points[i][1]);
+  }
+  ctx.closePath();
+  ctx.fillStyle = fillColor;
+  ctx.fill();
+  if(strokeColor) {
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+  }
+}
+
+function drawRect(ctx, x, y, w, h, fillColor, strokeColor = null) {
+  ctx.fillStyle = fillColor;
+  ctx.fillRect(x, y, w, h);
+  if(strokeColor) {
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, w, h);
+  }
+}
+
+// 绘制尾焰
+function drawFlame(ctx, cx, cy, direction = 'down', scale = 1) {
+  const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy + 20 * scale, 20 * scale);
+  gradient.addColorStop(0, 'rgba(255, 255, 200, 0.9)');
+  gradient.addColorStop(0.3, 'rgba(255, 160, 0, 0.7)');
+  gradient.addColorStop(0.7, 'rgba(255, 50, 0, 0.5)');
+  gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 12 * scale, 6 * scale, 18 * scale, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// ========== 我方：F-22 猛禽 ==========
+(function drawF22() {
+  const canvas = document.getElementById('playerF22');
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  // 背景
+  const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 120);
+  bgGrad.addColorStop(0, '#0a1020');
+  bgGrad.addColorStop(1, '#000000');
+  drawRect(ctx, 0, 0, canvas.width, canvas.height, bgGrad);
+
+  // 菱形主翼
+  const leftWing = [
+    [cx - 10, cy + 5],
+    [cx - 55, cy + 25],
+    [cx - 45, cy + 40],
+    [cx - 2,  cy + 22],
+  ];
+  const rightWing = [
+    [cx + 10, cy + 5],
+    [cx + 55, cy + 25],
+    [cx + 45, cy + 40],
+    [cx + 2,  cy + 22],
+  ];
+  drawPolygon(ctx, leftWing, '#2c3e50', '#3498db', 2);
+  drawPolygon(ctx, rightWing, '#2c3e50', '#3498db', 2);
+  // 翼边高光
+  drawLine(ctx, cx - 5, cy + 8, cx - 45, cy + 28, 'rgba(100, 180, 255, 0.6)', 2);
+  drawLine(ctx, cx + 5, cy + 8, cx + 45, cy + 28, 'rgba(100, 180, 255, 0.6)', 2);
+
+  // 机身
+  const fuselage = [
+    [cx,      cy - 40],
+    [cx - 8,  cy - 20],
+    [cx - 12, cy + 10],
+    [cx - 6,  cy + 25],
+    [cx,      cy + 20],
+    [cx + 6,  cy + 25],
+    [cx + 12, cy + 10],
+    [cx + 8,  cy - 20],
+  ];
+  drawPolygon(ctx, fuselage, '#34495e', '#50d0ff', 2);
+  // 机身高光
+  drawLine(ctx, cx, cy - 38, cx, cy + 18, 'rgba(150, 220, 255, 0.5)', 2);
+
+  // 外倾双垂尾
+  const leftTail = [
+    [cx - 4, cy + 18],
+    [cx - 12, cy + 18],
+    [cx - 18, cy + 42],
+    [cx - 2,  cy + 38],
+  ];
+  const rightTail = [
+    [cx + 4,  cy + 18],
+    [cx + 12, cy + 18],
+    [cx + 18, cy + 42],
+    [cx + 2,  cy + 38],
+  ];
+  drawPolygon(ctx, leftTail, '#2c3e50', '#3498db', 2);
+  drawPolygon(ctx, rightTail, '#2c3e50', '#3498db', 2);
+
+  // 座舱
+  const cockpit = [
+    [cx,      cy - 32],
+    [cx - 6,  cy - 18],
+    [cx - 4,  cy - 10],
+    [cx + 4,  cy - 10],
+    [cx + 6,  cy - 18],
+  ];
+  drawPolygon(ctx, cockpit, '#4a6fa5', '#85c1e9', 2);
+
+  // 进气道（两侧）
+  drawRect(ctx, cx - 16, cy + 2, 7, 10, '#2c3e50', '#3498db');
+  drawRect(ctx, cx + 9,  cy + 2, 7, 10, '#2c3e50', '#3498db');
+
+  // 翼下导弹挂架
+  for(let side of [-1, 1]) {
+    drawRect(ctx, cx + side * 38, cy + 28, 6, 12, '#34495e', '#50d0ff');
+  }
+
+  // 尾焰
+  drawFlame(ctx, cx - 8, cy + 40, 'down', 0.8);
+  drawFlame(ctx, cx + 8, cy + 40, 'down', 0.8);
+})();
+
+// ========== 敌方：F-16 战隼 ==========
+(function drawF16() {
+  const canvas = document.getElementById('enemyF16');
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  // 背景
+  const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 120);
+  bgGrad.addColorStop(0, '#1a0505');
+  bgGrad.addColorStop(1, '#000000');
+  drawRect(ctx, 0, 0, canvas.width, canvas.height, bgGrad);
+
+  // 单垂尾
+  const tail = [
+    [cx,      cy - 30],
+    [cx - 8,  cy - 10],
+    [cx + 8,  cy - 10],
+  ];
+  drawPolygon(ctx, tail, '#c0392b', '#e74c3c', 2);
+
+  // 后掠翼
+  const leftWing = [
+    [cx - 4,  cy - 5],
+    [cx - 50, cy + 15],
+    [cx - 40, cy + 30],
+    [cx,     cy + 12],
+  ];
+  const rightWing = [
+    [cx + 4,  cy - 5],
+    [cx + 50, cy + 15],
+    [cx + 40, cy + 30],
+    [cx,     cy + 12],
+  ];
+  drawPolygon(ctx, leftWing, '#922b21', '#e74c3c', 2);
+  drawPolygon(ctx, rightWing, '#922b21', '#e74c3c', 2);
+
+  // 机身
+  const fuselage = [
+    [cx,      cy - 35],
+    [cx - 6,  cy - 15],
+    [cx - 8,  cy + 15],
+    [cx - 4,  cy + 25],
+    [cx,      cy + 20],
+    [cx + 4,  cy + 25],
+    [cx + 8,  cy + 15],
+    [cx + 6,  cy - 15],
+  ];
+  drawPolygon(ctx, fuselage, '#c0392b', '#ff6b6b', 2);
+
+  // 座舱
+  const cockpit = [
+    [cx,      cy - 28],
+    [cx - 5,  cy - 16],
+    [cx - 3,  cy - 8],
+    [cx + 3,  cy - 8],
+    [cx + 5,  cy - 16],
+  ];
+  drawPolygon(ctx, cockpit, '#e74c3c', '#ff8c8c', 2);
+
+  // 进气道
+  drawRect(ctx, cx - 10, cy - 5, 8, 12, '#8b0000', '#ff6b6b');
+
+  // 机炮
+  drawLine(ctx, cx, cy - 35, cx, cy - 42, '#ddd', 2);
+
+  // 尾焰
+  drawFlame(ctx, cx, cy + 25, 'down', 0.6);
+})();
+
+// ========== 敌方：F-35 闪电II ==========
+(function drawF35() {
+  const canvas = document.getElementById('enemyF35');
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 120);
+  bgGrad.addColorStop(0, '#0d0d1a');
+  bgGrad.addColorStop(1, '#000000');
+  drawRect(ctx, 0, 0, canvas.width, canvas.height, bgGrad);
+
+  // 菱形机翼
+  const leftWing = [
+    [cx - 8,  cy + 2],
+    [cx - 52, cy + 20],
+    [cx - 42, cy + 38],
+    [cx - 2,  cy + 18],
+  ];
+  const rightWing = [
+    [cx + 8,  cy + 2],
+    [cx + 52, cy + 20],
+    [cx + 42, cy + 38],
+    [cx + 2,  cy + 18],
+  ];
+  drawPolygon(ctx, leftWing, '#283747', '#5dade2', 2);
+  drawPolygon(ctx, rightWing, '#283747', '#5dade2', 2);
+
+  // 双外倾垂尾
+  const leftTail = [
+    [cx - 6, cy + 18],
+    [cx - 16, cy + 18],
+    [cx - 22, cy + 42],
+    [cx - 4,  cy + 36],
+  ];
+  const rightTail = [
+    [cx + 6,  cy + 18],
+    [cx + 16, cy + 18],
+    [cx + 22, cy + 42],
+    [cx + 4,  cy + 36],
+  ];
+  drawPolygon(ctx, leftTail, '#283747', '#5dade2', 2);
+  drawPolygon(ctx, rightTail, '#283747', '#5dade2', 2);
+
+  // 机身
+  const fuselage = [
+    [cx,      cy - 38],
+    [cx - 10, cy - 18],
+    [cx - 14, cy + 8],
+    [cx - 8,  cy + 24],
+    [cx,      cy + 20],
+    [cx + 8,  cy + 24],
+    [cx + 14, cy + 8],
+    [cx + 10, cy - 18],
+  ];
+  drawPolygon(ctx, fuselage, '#1f2b38', '#5dade2', 2);
+
+  // 双侧进气道
+  drawRect(ctx, cx - 18, cy - 2, 7, 12, '#1a252f', '#5dade2');
+  drawRect(ctx, cx + 11, cy - 2, 7, 12, '#1a252f', '#5dade2');
+
+  // 座舱
+  const cockpit = [
+    [cx,      cy - 30],
+    [cx - 6,  cy - 16],
+    [cx - 4,  cy - 8],
+    [cx + 4,  cy - 8],
+    [cx + 6,  cy - 16],
+  ];
+  drawPolygon(ctx, cockpit, '#34495e', '#85c1e9', 2);
+
+  // 翼尖挂架
+  for(let side of [-1, 1]) {
+    drawRect(ctx, cx + side * 40, cy + 26, 5, 10, '#1a252f', '#5dade2');
+  }
+
+  // 双引擎尾焰
+  drawFlame(ctx, cx - 6, cy + 35, 'down', 0.7);
+  drawFlame(ctx, cx + 6, cy + 35, 'down', 0.7);
+})();
+
+// ========== 敌方：F-117 夜鹰 ==========
+(function drawF117() {
+  const canvas = document.getElementById('enemyF117');
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 120);
+  bgGrad.addColorStop(0, '#050510');
+  bgGrad.addColorStop(1, '#000000');
+  drawRect(ctx, 0, 0, canvas.width, canvas.height, bgGrad);
+
+  // 多面体棱角外形 - 蝙蝠翼
+  const wing = [
+    [cx,      cy - 10],
+    [cx - 60, cy + 20],
+    [cx - 30, cy + 40],
+    [cx - 10, cy + 25],
+    [cx,      cy + 35],
+    [cx + 10, cy + 25],
+    [cx + 30, cy + 40],
+    [cx + 60, cy + 20],
+  ];
+  drawPolygon(ctx, wing, '#1c2833', '#85929e', 2);
+
+  // 机身多面体
+  const fuselage = [
+    [cx,      cy - 25],
+    [cx - 12, cy - 8],
+    [cx - 15, cy + 15],
+    [cx - 8,  cy + 25],
+    [cx,      cy + 20],
+    [cx + 8,  cy + 25],
+    [cx + 15, cy + 15],
+    [cx + 12, cy - 8],
+  ];
+  drawPolygon(ctx, fuselage, '#2c3e50', '#aeb6bf', 2);
+
+  // V形尾翼
+  const vTail = [
+    [cx - 8,  cy + 20],
+    [cx - 15, cy + 40],
+    [cx - 5,  cy + 36],
+    [cx,      cy + 28],
+    [cx + 5,  cy + 36],
+    [cx + 15, cy + 40],
+    [cx + 8,  cy + 20],
+  ];
+  drawPolygon(ctx, vTail, '#1c2833', '#85929e', 2);
+
+  // 座舱（棱角形）
+  const cockpit = [
+    [cx,      cy - 20],
+    [cx - 6,  cy - 10],
+    [cx - 3,  cy - 5],
+    [cx + 3,  cy - 5],
+    [cx + 6,  cy - 10],
+  ];
+  drawPolygon(ctx, cockpit, '#5d6d7e', '#ccd1d1', 2);
+
+  // 折线边缘细节
+  drawLine(ctx, cx - 12, cy - 5, cx - 15, cy + 12, '#aeb6bf', 1);
+  drawLine(ctx, cx + 12, cy - 5, cx + 15, cy + 12, '#aeb6bf', 1);
+  drawLine(ctx, cx - 15, cy + 12, cx - 8, cy + 22, '#aeb6bf', 1);
+  drawLine(ctx, cx + 15, cy + 12, cx + 8, cy + 22, '#aeb6bf', 1);
+
+  // 双尾喷
+  drawFlame(ctx, cx - 5, cy + 30, 'down', 0.6);
+  drawFlame(ctx, cx + 5, cy + 30, 'down', 0.6);
+})();
+
+// ========== 敌方：C-17 环球霸王 ==========
+(function drawC17() {
+  const canvas = document.getElementById('enemyC17');
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 120);
+  bgGrad.addColorStop(0, '#10101a');
+  bgGrad.addColorStop(1, '#000000');
+  drawRect(ctx, 0, 0, canvas.width, canvas.height, bgGrad);
+
+  // 超临界机翼
+  const leftWing = [
+    [cx - 2,  cy + 5],
+    [cx - 58, cy + 15],
+    [cx - 50, cy + 35],
+    [cx + 2,  cy + 20],
+  ];
+  const rightWing = [
+    [cx + 2,  cy + 5],
+    [cx + 58, cy + 15],
+    [cx + 50, cy + 35],
+    [cx - 2,  cy + 20],
+  ];
+  drawPolygon(ctx, leftWing, '#566573', '#bdc3c7', 2);
+  drawPolygon(ctx, rightWing, '#566573', '#bdc3c7', 2);
+
+  // T型尾翼
+  const horizontalTail = [
+    [cx - 20, cy - 10],
+    [cx - 20, cy + 5],
+    [cx + 20, cy + 5],
+    [cx + 20, cy - 10],
+  ];
+  const verticalTail = [
+    [cx - 5,  cy - 30],
+    [cx - 5,  cy - 10],
+    [cx + 5,  cy - 10],
+    [cx + 5,  cy - 30],
+  ];
+  drawPolygon(ctx, horizontalTail, '#566573', '#bdc3c7', 2);
+  drawPolygon(ctx, verticalTail, '#4a5b6c', '#bdc3c7', 2);
+
+  // 宽大机身
+  const fuselage = [
+    [cx,      cy - 28],
+    [cx - 14, cy - 15],
+    [cx - 16, cy + 20],
+    [cx - 10, cy + 30],
+    [cx,      cy + 28],
+    [cx + 10, cy + 30],
+    [cx + 16, cy + 20],
+    [cx + 14, cy - 15],
+  ];
+  drawPolygon(ctx, fuselage, '#4a5b6c', '#ecf0f1', 2);
+
+  // 座舱
+  drawRect(ctx, cx - 10, cy - 26, 20, 12, '#7f8c8d', '#ecf0f1');
+
+  // 两台翼下发动机
+  for(let side of [-1, 1]) {
+    drawRect(ctx, cx + side * 35, cy + 22, 10, 16, '#34495e', '#bdc3c7');
+  }
+
+  // 尾翼下方引擎
+  drawRect(ctx, cx - 8, cy - 10, 16, 10, '#34495e', '#bdc3c7');
+
+  // 四发尾焰
+  for(let side of [-35, 35]) {
+    drawFlame(ctx, cx + side + 5, cy + 38, 'down', 0.5);
+  }
+  drawFlame(ctx, cx, cy - 5, 'down', 0.5);
+})();
+
+// ========== 敌方：B-52 同温层堡垒 ==========
+(function drawB52() {
+  const canvas = document.getElementById('enemyB52');
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 120);
+  bgGrad.addColorStop(0, '#1a1a2e');
+  bgGrad.addColorStop(1, '#000000');
+  drawRect(ctx, 0, 0, canvas.width, canvas.height, bgGrad);
+
+  // 长直机翼
+  const leftWing = [
+    [cx + 2,  cy + 5],
+    [cx - 65, cy + 12],
+    [cx - 60, cy + 30],
+    [cx - 2,  cy + 20],
+  ];
+  const rightWing = [
+    [cx - 2,  cy + 5],
+    [cx + 65, cy + 12],
+    [cx + 60, cy + 30],
+    [cx + 2,  cy + 20],
+  ];
+  drawPolygon(ctx, leftWing, '#5d6d7e', '#d0d3d4', 2);
+  drawPolygon(ctx, rightWing, '#5d6d7e', '#d0d3d4', 2);
+
+  // 八台发动机（四个翼下两组）
+  for(let side of [-50, -30, 30, 50]) {
+    drawRect(ctx, cx + side - 6, cy + 18, 12, 10, '#4a5b6c', '#d0d3d4');
+    drawFlame(ctx, cx + side, cy + 28, 'down', 0.4);
+  }
+
+  // 长机身
+  const fuselage = [
+    [cx,      cy - 35],
+    [cx - 8,  cy - 20],
+    [cx - 10, cy + 25],
+    [cx - 5,  cy + 35],
+    [cx,      cy + 32],
+    [cx + 5,  cy + 35],
+    [cx + 10, cy + 25],
+    [cx + 8,  cy - 20],
+  ];
+  drawPolygon(ctx, fuselage, '#4a5b6c', '#f2f3f4', 2);
+
+  // 座舱
+  drawRect(ctx, cx - 8, cy - 32, 16, 10, '#708090', '#f2f3f4');
+
+  // 垂尾
+  const tail = [
+    [cx - 6,  cy + 22],
+    [cx - 6,  cy + 42],
+    [cx + 6,  cy + 42],
+    [cx + 6,  cy + 22],
+  ];
+  drawPolygon(ctx, tail, '#4a5b6c', '#d0d3d4', 2);
+
+  // 水平尾翼
+  const hTail = [
+    [cx - 25, cy + 25],
+    [cx - 25, cy + 35],
+    [cx + 25, cy + 35],
+    [cx + 25, cy + 25],
+  ];
+  drawPolygon(ctx, hTail, '#5d6d7e', '#d0d3d4', 2);
+
+  // 八发尾焰已经在引擎位置绘制
+})();
+
+// ========== Boss：SpaceX 星际飞船 ==========
+(function drawSpaceX() {
+  const canvas = document.getElementById('bossSpaceX');
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 180);
+  bgGrad.addColorStop(0, '#0a0a15');
+  bgGrad.addColorStop(1, '#000000');
+  drawRect(ctx, 0, 0, canvas.width, canvas.height, bgGrad);
+
+  // 不锈钢机身（银灰色）
+  const fuselage = [
+    [cx,      cy - 140],
+    [cx - 18, cy - 100],
+    [cx - 28, cy + 40],
+    [cx - 22, cy + 100],
+    [cx,      cy + 110],
+    [cx + 22, cy + 100],
+    [cx + 28, cy + 40],
+    [cx + 18, cy - 100],
+  ];
+  drawPolygon(ctx, fuselage, '#aeb6bf', '#ffffff', 3);
+
+  // 侧棱高光
+  drawLine(ctx, cx + 22, cy - 80, cx + 28, cy + 30, 'rgba(255,255,255,0.6)', 3);
+  drawLine(ctx, cx - 22, cy - 80, cx - 28, cy + 30, 'rgba(255,255,255,0.6)', 3);
+
+  // 格栅翼（控制翼）
+  const leftGridFin = [
+    [cx - 28, cy - 10],
+    [cx - 55, cy + 10],
+    [cx - 48, cy + 40],
+    [cx - 22, cy + 18],
+  ];
+  const rightGridFin = [
+    [cx + 28, cy - 10],
+    [cx + 55, cy + 10],
+    [cx + 48, cy + 40],
+    [cx + 22, cy + 18],
+  ];
+  drawPolygon(ctx, leftGridFin, '#6c7a89', '#bdc3c7', 2);
+  drawPolygon(ctx, rightGridFin, '#6c7a89', '#bdc3c7', 2);
+
+  // 尾翼
+  const bottomLeft = [
+    [cx - 22,  cy + 60],
+    [cx - 45,  cy + 100],
+    [cx - 20,  cy + 105],
+    [cx - 15,  cy + 70],
+  ];
+  const bottomRight = [
+    [cx + 22,  cy + 60],
+    [cx + 45,  cy + 100],
+    [cx + 20,  cy + 105],
+    [cx + 15,  cy + 70],
+  ];
+  drawPolygon(ctx, bottomLeft, '#808b96', '#d5d8dc', 2);
+  drawPolygon(ctx, bottomRight, '#808b96', '#d5d8dc', 2);
+
+  // 顶部黑盖
+  const noseCone = [
+    [cx,      cy - 140],
+    [cx - 12,  cy - 120],
+    [cx - 8,  cy - 100],
+    [cx + 8,  cy - 100],
+    [cx + 12,  cy - 120],
+  ];
+  drawPolygon(ctx, noseCone, '#2c3e50', '#ffffff', 2);
+
+  // 窗口玻璃
+  for(let i = 0; i < 4; i++) {
+    const wy = -80 + i * 25;
+    drawRect(ctx, cx - 10, wy, 20, 14, '#3498db', '#85c1e9');
+  }
+
+  // 主引擎喷口
+  drawRect(ctx, cx - 15, cy + 100, 30, 15, '#2c3e50', '#ffffff');
+
+  // 巨大主引擎尾焰
+  const r = 80;
+  const flameGrad = ctx.createRadialGradient(cx, cy + 120, 0, cx, cy + 160, 80);
+  flameGrad.addColorStop(0, 'rgba(255, 255, 200, 0.95)');
+  flameGrad.addColorStop(0.2, 'rgba(255, 200, 50, 0.8)');
+  flameGrad.addColorStop(0.5, 'rgba(255, 100, 0, 0.6)');
+  flameGrad.addColorStop(0.8, 'rgba(255, 0, 0, 0.3)');
+  flameGrad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+  ctx.fillStyle = flameGrad;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 150, 25, 80, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 侧炮塔
+  for(let side of [-1, 1]) {
+    drawRect(ctx, cx + side * 25, cy + 20, 8, 20, '#2c3e50', '#ffffff');
+    drawLine(ctx, cx + side * 25 + 4, cy + 40, cx + side * 35, cy + 50, '#ddd', 2);
+  }
+
+  // SpaceX logo 标识
+  ctx.font = 'bold 16px Arial';
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.textAlign = 'center';
+  ctx.fillText('SPACEX', cx, cy + 0);
+})();
+</script>
+</body>
+</html>
